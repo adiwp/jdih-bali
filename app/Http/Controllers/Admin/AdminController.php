@@ -22,11 +22,10 @@ class AdminController extends Controller
     {
         $thumbnail = Str::replace(".{$extension}", "_md.{$extension}", $path);
         if (Storage::disk('public')->exists($path)) {
-            Image::make(storage_path('app/public/' . $path))
-                ->resize($width, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })
-                ->save(storage_path('app/public/' . $thumbnail));
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image = $manager->read(storage_path('app/public/' . $path));
+            $image->scaleDown(width: $width);
+            $image->save(storage_path('app/public/' . $thumbnail));
         }
     }
 
@@ -34,9 +33,10 @@ class AdminController extends Controller
     {
         $thumbnail = Str::replace(".{$extension}", "_sq.{$extension}", $path);
         if (Storage::disk('public')->exists($path)) {
-            Image::make(storage_path('app/public/' . $path))
-                ->fit($dimension)
-                ->save(storage_path('app/public/' . $thumbnail));
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image = $manager->read(storage_path('app/public/' . $path));
+            $image->cover($dimension, $dimension);
+            $image->save(storage_path('app/public/' . $thumbnail));
         }
     }
 

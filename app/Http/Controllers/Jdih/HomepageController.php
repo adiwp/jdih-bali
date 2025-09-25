@@ -47,7 +47,7 @@ class HomepageController extends JdihController
         $totalJudgments	  = Legislation::ofType(4)->published()->count();
 
         $popularLaw = Legislation::ofType(1)->popular()->first();
-        $popularLawDoc = $popularLaw->documents()
+        $popularLawDoc = $popularLaw?->documents()
             ->ofType('master')
             ->first();
 
@@ -64,7 +64,7 @@ class HomepageController extends JdihController
             ->latest()
             ->first();
 
-        $cover = $monograph->documents()
+        $cover = $monograph?->documents()
             ->ofType('cover')
             ->first();
 

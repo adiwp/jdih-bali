@@ -183,7 +183,10 @@ class UserController extends AdminController
             $extension = $image->getClientOriginalExtension();
             $thumbnail = Str::replace(".{$extension}", "_sq.{$extension}", $path);
             if (Storage::disk('public')->exists($path)) {
-                Image::make(storage_path('app/public/' . $path))->fit(200)->save(storage_path('app/public/' . $thumbnail));
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $img = $manager->read(storage_path('app/public/' . $path));
+                $img->cover(200, 200);
+                $img->save(storage_path('app/public/' . $thumbnail));
             }
         }
 

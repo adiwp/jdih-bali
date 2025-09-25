@@ -110,10 +110,15 @@
         <div class="content">
 
             @isset ($popularLaw)
+                @php
+                    $popularLawDocument = $popularLaw->masterDocument();
+                @endphp
+                
+                @if($popularLawDocument)
                 <!-- Popular law -->
                 <div class="row pb-5 gx-5">
                     <div class="col-xl-6 m-auto">
-                        <figure id="adobe-dc-view" data-file="{{ $popularLaw->masterDocumentSource }}" data-name="{{ $popularLaw->masterDocument()->media->file_name }}" class="rounded shadow" style="height: 700px;">
+                        <figure id="adobe-dc-view" data-file="{{ $popularLaw->masterDocumentSource }}" data-name="{{ $popularLawDocument->media->file_name }}" class="rounded shadow" style="height: 700px;">
                         </figure>
                         @include('jdih.legislation.pdfEmbed', ['el' => 'adobe-dc-view'])
                     </div>
@@ -215,7 +220,7 @@
                             <div class="d-flex mt-5">
                                 <a href="{{ route('legislation.law.show', ['category' => $popularLaw->category->slug, 'legislation' => $popularLaw->slug]) }}" class="btn btn-outline-dark lift px-3 me-3 fw-semibold">Lihat Detail<i class="ph-arrow-right ms-2"></i></a>
                                 @isset($popularLaw->masterDocumentSource)
-                                    <form action="{{ route('legislation.download', $popularLaw->masterDocument()->id) }}" method="post">
+                                    <form action="{{ route('legislation.download', $popularLawDocument->id) }}" method="post">
                                         @method('PUT')
                                         @csrf
                                         <button type="submit" class="btn btn-dark lift px-3 fw-semibold">
@@ -228,6 +233,7 @@
                     </div>
                 </div>
                 <!-- /popular law -->
+                @endif
             @endisset
 
             @if (isset($latestLaws) AND $latestLaws->count() > 0)

@@ -26,7 +26,12 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $settings = Setting::pluck('value', 'key')->toArray();
+        try {
+            $settings = Setting::pluck('value', 'key')->toArray();
+        } catch (\Exception $e) {
+            // If database not ready or table doesn't exist, use default values
+            $settings = [];
+        }
 
         $settings['appLogoUrl'] = isset($settings['appLogo'])
             ? (Storage::disk('public')->exists($settings['appLogo'])
@@ -40,36 +45,40 @@ class ViewServiceProvider extends ServiceProvider
                 : '/assets/admin/images/jdihn-logo-web.png')
             : '/assets/admin/images/jdihn-logo-web.png';
 
-        $settings['fullAddress'] = implode(', ', [
-            $settings['address'],
-            $settings['city'],
-            $settings['district'],
-            $settings['regency'],
-            $settings['province']
-        ]);
+        $settings['fullAddress'] = implode(', ', array_filter([
+            $settings['address'] ?? '',
+            $settings['city'] ?? '',
+            $settings['district'] ?? '',
+            $settings['regency'] ?? '',
+            $settings['province'] ?? ''
+        ]));
 
         View::share($settings);
 
-        View::composer(
-            ['jdih.layouts.footer', 'jdih.legislation.leftbar'],
-            FooterComposer::class
-        );
+        try {
+            View::composer(
+                ['jdih.layouts.footer', 'jdih.legislation.leftbar'],
+                FooterComposer::class
+            );
 
-        View::composer('jdih.layouts.footer', function ($view) {
-            $todayVisitor = Visitor::countDaily()->get()->count();
-            $yesterdayVisitor = Visitor::countDaily(1)->get()->count();
-            $lastWeekVisitor = Visitor::countWeekly()->get()->count();
-            $lastMonthVisitor = Visitor::countMonthly()->get()->count();
-            $allVisitor = Visitor::countAll()->get()->count();
+            View::composer('jdih.layouts.footer', function ($view) {
+                $todayVisitor = Visitor::countDaily()->get()->count();
+                $yesterdayVisitor = Visitor::countDaily(1)->get()->count();
+                $lastWeekVisitor = Visitor::countWeekly()->get()->count();
+                $lastMonthVisitor = Visitor::countMonthly()->get()->count();
+                $allVisitor = Visitor::countAll()->get()->count();
 
-            $welcome = Post::whereSlug('selamat-datang')->first();
+                $welcome = Post::whereSlug('selamat-datang')->first();
 
-            return $view->with('todayVisitor', $todayVisitor)
-                ->with('yesterdayVisitor', $yesterdayVisitor)
-                ->with('lastWeekVisitor', $lastWeekVisitor)
-                ->with('lastMonthVisitor', $lastMonthVisitor)
-                ->with('allVisitor', $allVisitor)
-                ->with('welcome', $welcome);
-        });
+                return $view->with('todayVisitor', $todayVisitor)
+                    ->with('yesterdayVisitor', $yesterdayVisitor)
+                    ->with('lastWeekVisitor', $lastWeekVisitor)
+                    ->with('lastMonthVisitor', $lastMonthVisitor)
+                    ->with('allVisitor', $allVisitor)
+                    ->with('welcome', $welcome);
+            });
+        } catch (\Exception $e) {
+            // Skip if database is not ready
+        }
     }
 }

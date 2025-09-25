@@ -60,9 +60,10 @@ class LegislationController extends AdminController
             $extension = $file->getClientOriginalExtension();
             $thumbnail = Str::replace(".{$extension}", "_md.{$extension}", $path);
             if (Storage::disk('public')->exists($path)) {
-                Image::make(storage_path('app/public/' . $path))->resize(400, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                })->save(storage_path('app/public/' . $thumbnail));
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $image = $manager->read(storage_path('app/public/' . $path));
+                $image->scaleDown(width: 400);
+                $image->save(storage_path('app/public/' . $thumbnail));
             }
         }
 

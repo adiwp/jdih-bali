@@ -297,9 +297,18 @@
                         <div class="tab-content p-4 fs-lg">
                             <div class="tab-pane fade active show" id="master" role="tabpanel">
                                 @isset($legislation->masterDocumentSource)
-                                    <figure id="master-view" data-file="{{ $legislation->masterDocumentSource }}" data-name="{{ $legislation->masterDocument()->media->name }}" class="rounded mb-0" style="height: 720px;">
-                                    </figure>
-                                    @include('jdih.legislation.pdfEmbed', ['el' => 'master-view'])
+                                    @php
+                                        $masterDoc = $legislation->masterDocument();
+                                    @endphp
+                                    @if($masterDoc && $masterDoc->media)
+                                        <figure id="master-view" data-file="{{ $legislation->masterDocumentSource }}" data-name="{{ $masterDoc->media->name }}" class="rounded mb-0" style="height: 720px;">
+                                        </figure>
+                                        @include('jdih.legislation.pdfEmbed', ['el' => 'master-view'])
+                                    @else
+                                        <figure class="rounded mb-0">
+                                            <img src="{{ asset('assets/jdih/images/illustrations/file-not-found.jpeg') }}" class="img-fluid rounded">
+                                        </figure>
+                                    @endif
                                 @else
                                     <figure class="rounded mb-0">
                                         <img src="{{ asset('assets/jdih/images/illustrations/file-not-found.jpeg') }}" class="img-fluid rounded">
@@ -354,21 +363,26 @@
 
                     <div class="card-body">
                         <div class="text-center pt-2">
-                            {!! QrCode::size(180)->margin(2)->generate(url()->current()); !!}
+                            {!! generate_qrcode(url()->current(), 180, 2) !!}
                             <p class="mb-0">Pindai kode QR</p>
                         </div>
                         <div class="mt-4">
                             @isset($legislation->masterDocumentSource)
-                                <form action="{{ route('legislation.download', $legislation->masterDocument()->id) }}" method="post">
-                                    @method('PUT')
-                                    @csrf
-                                    <button type="submit" class="btn btn-danger btn-lg btn-labeled btn-labeled-start fw-bold rounded w-100 mb-2">
-                                        <span class="btn-labeled-icon bg-black bg-opacity-20">
-                                            <i class="ph-download"></i>
-                                        </span>
-                                        Dokumen
-                                    </button>
-                                </form>
+                                @php
+                                    $masterDoc = $legislation->masterDocument();
+                                @endphp
+                                @if($masterDoc)
+                                    <form action="{{ route('legislation.download', $masterDoc->id) }}" method="post">
+                                        @method('PUT')
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger btn-lg btn-labeled btn-labeled-start fw-bold rounded w-100 mb-2">
+                                            <span class="btn-labeled-icon bg-black bg-opacity-20">
+                                                <i class="ph-download"></i>
+                                            </span>
+                                            Dokumen
+                                        </button>
+                                    </form>
+                                @endif
                             @endisset
 
                             @isset($legislation->abstractDocument()->id)

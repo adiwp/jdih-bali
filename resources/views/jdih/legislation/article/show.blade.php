@@ -148,9 +148,18 @@
                             <h4 class="fw-bold mb-0">Pratinjau Dokumen</h4>
                         </div>
                         <div class="card-body">
-                            <figure id="master-view" data-file="{{ $legislation->masterDocumentSource }}" data-name="{{ $legislation->masterDocument()->media->name }}" class="rounded mb-0" style="height: 720px;">
-                            </figure>
-                            @include('jdih.legislation.pdfEmbed', ['el' => 'master-view'])
+                            @php
+                                $masterDoc = $legislation->masterDocument();
+                            @endphp
+                            @if($masterDoc && $masterDoc->media)
+                                <figure id="master-view" data-file="{{ $legislation->masterDocumentSource }}" data-name="{{ $masterDoc->media->name }}" class="rounded mb-0" style="height: 720px;">
+                                </figure>
+                                @include('jdih.legislation.pdfEmbed', ['el' => 'master-view'])
+                            @else
+                                <div class="text-center py-5">
+                                    <p class="text-muted">Dokumen tidak tersedia</p>
+                                </div>
+                            @endif
                         </div>
                     </section>
                     <!-- /documents preview -->
@@ -183,12 +192,26 @@
 
                     <div class="card-body">
                         <div class="text-center pt-2">
-                            {!! QrCode::size(180)->margin(2)->generate(url()->current()); !!}
+                            {!! generate_qrcode(url()->current(), 180, 2) !!}
                             <p class="mb-0">Pindai kode QR</p>
                         </div>
                         @isset($legislation->masterDocumentSource)
                             <div class="mt-4">
-                                <form action="{{ route('legislation.download', $legislation->masterDocument()->id) }}" method="post">
+                                @php
+                                    $masterDoc = $legislation->masterDocument();
+                                @endphp
+                                @if($masterDoc)
+                                    <form action="{{ route('legislation.download', $masterDoc->id) }}" method="post">
+                                        @method('PUT')
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger btn-lg btn-labeled btn-labeled-start fw-bold rounded w-100 mb-2">
+                                            <span class="btn-labeled-icon bg-black bg-opacity-20">
+                                                <i class="ph-download"></i>
+                                            </span>
+                                            Dokumen
+                                        </button>
+                                    </form>
+                                @endif
                                     @method('PUT')
                                     @csrf
                                     <button type="submit" class="btn btn-danger btn-lg btn-labeled btn-labeled-start fw-bold rounded w-100 mb-2">
