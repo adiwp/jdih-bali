@@ -6,8 +6,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "dompdf/dompdf": "^3.0",
         "archtechx/enums": "^1.0",
+        "dompdf/dompdf": "^3.0",
+        "endroid/qr-code": "^5.0",
+        "filament/filament": "^4.0",
         "guzzlehttp/guzzle": "^7.8",
         "intervention/image": "^3.0",
         "itsgoingd/clockwork": "^5.2",
@@ -17,8 +19,7 @@
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10",
-        "maatwebsite/excel": "^3.1",
-        "endroid/qr-code": "^5.0"
+        "maatwebsite/excel": "^3.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -47,7 +48,8 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan filament:upgrade"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
