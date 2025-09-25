@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<!DOCTYPE 	<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+	<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('favicon-192x192.png') }}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.ico') }}">
+	<link rel="shortcut icon" href="{{ asset('favicon.ico') }}"&gt;>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="layout-static">
 
 <head>

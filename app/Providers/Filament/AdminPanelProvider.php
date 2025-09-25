@@ -33,8 +33,9 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Gray,
             ])
             ->brandName('JDIH CMS - Biro Hukum Provinsi Bali')
-            ->brandLogo(asset('assets/admin/images/jdihn-logo-web.png'))
+            ->brandLogo(url('assets/admin/images/jdihn-logo-web.png'))
             ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon.ico'))
             ->authGuard('web')
             ->userMenuItems([
                 'profile' => 'filament-panels::layout.actions.open-user-menu.profile',
