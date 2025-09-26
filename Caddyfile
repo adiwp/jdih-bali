@@ -1,0 +1,65 @@
+# Caddyfile for JDIH CMS with FrankenPHP
+# This file can be used with Caddy server as reverse proxy
+
+# Development configuration
+{$APP_URL:localhost:8000} {
+    # Enable compression
+    encode gzip
+
+    # Handle PHP files with FrankenPHP
+    php_server
+
+    # Static file handling
+    handle_path /assets/* {
+        root * public
+        file_server
+    }
+
+    handle_path /storage/* {
+        root * storage/app/public
+        file_server
+    }
+
+    # Fallback to Laravel
+    handle {
+        reverse_proxy localhost:8000
+    }
+
+    # Security headers
+    header {
+        # Remove server info
+        -Server
+        
+        # Security headers
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        
+        # HSTS (uncomment for production with HTTPS)
+        # Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+}
+
+# Production configuration (with HTTPS)
+# {$APP_URL} {
+#     # Enable compression
+#     encode gzip
+# 
+#     # Handle PHP files with FrankenPHP
+#     php_server {
+#         root public
+#         index index.php
+#     }
+# 
+#     # Security headers for production
+#     header {
+#         -Server
+#         X-Content-Type-Options nosniff
+#         X-Frame-Options DENY
+#         X-XSS-Protection "1; mode=block"
+#         Referrer-Policy strict-origin-when-cross-origin
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#         Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'"
+#     }
+# }

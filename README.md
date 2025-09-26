@@ -56,6 +56,12 @@ A comprehensive JDIH (Legal Documentation and Information Network) Content Manag
 - **Limitless Template** - Professional admin template
 - **Adobe PDF Embed API** - Document viewer integration
 
+### High Performance
+- **Laravel Octane** - Supercharged application server
+- **FrankenPHP** - Modern PHP application server with HTTP/2 and HTTP/3 support
+- **Worker-based Architecture** - Persistent application instances for maximum performance
+- **Built-in Load Balancing** - Automatic request distribution across workers
+
 ### Key Libraries
 - **Intervention Image 3.0** - Modern image processing
 - **Endroid QR Code 5.0** - QR code generation
@@ -69,7 +75,8 @@ A comprehensive JDIH (Legal Documentation and Information Network) Content Manag
 - **Composer 2.x**
 - **Node.js 18+** and **npm 9+**
 - **MySQL 8.0** or **MariaDB 10.4+**
-- **Apache/Nginx** web server
+- **Apache/Nginx** web server (optional with FrankenPHP)
+- **FrankenPHP** - For high-performance deployment (automatically installed)
 
 ## 🛠 Installation
 
@@ -127,9 +134,27 @@ npm run dev
 ```
 
 ### 7. Start Development Server
+
+#### Option A: Traditional Laravel Development Server
 ```bash
 php artisan serve
 ```
+
+#### Option B: High-Performance Server with Laravel Octane + FrankenPHP
+```bash
+# Start Octane server
+php artisan octane:start
+
+# Or using the convenience script
+./octane.sh start
+
+# Start with file watching (auto-restart on changes)
+./octane.sh start-watch
+```
+
+**Performance Comparison:**
+- Traditional server: ~50-100 requests/second
+- Octane + FrankenPHP: ~1,000+ requests/second with persistent state
 
 Visit http://localhost:8000 for the public interface and http://localhost:8000/admin for the admin panel.
 
@@ -156,6 +181,186 @@ ADOBE_EMBED_API_KEY=your_api_key
 LEGISLATION_PER_PAGE=25
 MAX_UPLOAD_SIZE=10240
 ALLOWED_FILE_TYPES=pdf,doc,docx,jpg,jpeg,png
+
+# Laravel Octane + FrankenPHP Configuration
+OCTANE_SERVER=frankenphp
+OCTANE_HOST=127.0.0.1
+OCTANE_PORT=8000
+OCTANE_WORKERS=4
+OCTANE_MAX_REQUESTS=500
+```
+
+## 🚀 High-Performance Deployment with Laravel Octane + FrankenPHP
+
+This application comes pre-configured with Laravel Octane and FrankenPHP for maximum performance.
+
+### What is Laravel Octane + FrankenPHP?
+
+**Laravel Octane** supercharges your application by serving it using high-powered application servers, including **FrankenPHP**. FrankenPHP is a modern PHP application server written in Go that provides:
+
+- **HTTP/2 and HTTP/3 support** - Latest web protocols
+- **Built-in HTTPS with automatic certificates** - Production-ready security
+- **Worker mode** - Persistent application instances
+- **Real-time features** - WebSockets and Server-Sent Events
+- **Caddy server integration** - Advanced reverse proxy capabilities
+
+### Performance Benefits
+
+| Server Type | Requests/Second | Memory Usage | Features |
+|-------------|-----------------|--------------|----------|
+| Traditional PHP-FPM | 50-100 | High | Basic HTTP |
+| Laravel Octane + FrankenPHP | 1,000+ | Low | HTTP/2, HTTP/3, Workers |
+
+### Quick Start
+
+#### 1. Development Server
+```bash
+# Start the high-performance server
+./octane.sh start
+
+# Start with file watching (restarts on code changes)
+./octane.sh start-watch
+
+# Other commands
+./octane.sh stop      # Stop server
+./octane.sh restart   # Restart server
+./octane.sh reload    # Reload workers
+./octane.sh status    # Check status
+```
+
+#### 2. Manual Commands
+```bash
+# Start Octane with custom configuration
+php artisan octane:start --host=127.0.0.1 --port=8000 --workers=4
+
+# Start with file watching
+php artisan octane:start --watch
+
+# Stop the server
+php artisan octane:stop
+
+# Restart the server
+php artisan octane:restart
+
+# Reload workers (zero-downtime deployment)
+php artisan octane:reload
+```
+
+#### 3. Production Deployment
+
+##### Option A: Docker Deployment
+```bash
+# Build and start with Docker Compose
+docker-compose up -d
+
+# Scale workers
+docker-compose up -d --scale app=4
+```
+
+##### Option B: System Service
+Create a systemd service file `/etc/systemd/system/jdih-cms.service`:
+
+```ini
+[Unit]
+Description=JDIH CMS Octane Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/jdih-cms
+ExecStart=/usr/bin/php /path/to/jdih-cms/artisan octane:start --host=0.0.0.0 --port=8000 --workers=4
+Restart=always
+RestartSec=5
+Environment=APP_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+```bash
+sudo systemctl enable jdih-cms
+sudo systemctl start jdih-cms
+```
+
+### Monitoring & Maintenance
+
+#### Health Checks
+```bash
+# Check server status
+curl -I http://localhost:8000/health
+
+# Monitor performance
+php artisan octane:status
+```
+
+#### Worker Management
+```bash
+# Reload workers without downtime
+php artisan octane:reload
+
+# Restart all workers
+php artisan octane:restart
+```
+
+#### Performance Tuning
+Edit `.env` for optimization:
+
+```env
+# Production optimizations
+OCTANE_WORKERS=auto          # Auto-detect CPU cores
+OCTANE_MAX_REQUESTS=1000     # Requests before worker restart
+OCTANE_HTTPS=true           # Enable HTTPS (production)
+```
+
+### Advanced Configuration
+
+#### Custom Caddyfile
+The included `Caddyfile` provides advanced configuration:
+
+```caddyfile
+{$APP_URL} {
+    encode gzip
+    php_server
+    
+    # Security headers
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Strict-Transport-Security "max-age=31536000"
+    }
+}
+```
+
+#### Load Balancing
+For high-traffic applications, use multiple instances:
+
+```bash
+# Start multiple instances on different ports
+php artisan octane:start --port=8001 --workers=4 &
+php artisan octane:start --port=8002 --workers=4 &
+php artisan octane:start --port=8003 --workers=4 &
+```
+
+Configure your load balancer (nginx/caddy) to distribute requests.
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Memory Leaks**: Configure `OCTANE_MAX_REQUESTS` to restart workers periodically
+2. **File Changes Not Reflected**: Use `--watch` flag or manually restart
+3. **Database Connection Issues**: Ensure proper connection pooling
+
+#### Debug Mode
+```bash
+# Start with verbose logging
+php artisan octane:start --verbose
+
+# Check logs
+tail -f storage/logs/laravel.log
 ```
 
 ### File Permissions
@@ -204,6 +409,9 @@ This version has been upgraded from Laravel 10 to Laravel 12 with the following 
 - ✅ **Vite 5**: Faster development and build processes
 - ✅ **Modern Frontend**: Updated asset pipeline and tooling
 - ✅ **Database Optimization**: Enhanced query performance
+- ✅ **Laravel Octane**: High-performance application server integration
+- ✅ **FrankenPHP**: Modern PHP server with HTTP/2 and HTTP/3 support
+- ✅ **Worker Architecture**: Persistent application state for maximum performance
 
 ## 🤝 Contributing
 
